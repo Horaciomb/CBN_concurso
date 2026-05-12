@@ -1,11 +1,17 @@
-import { CheckCircle2, Clock, Pencil, Trash2, Check } from 'lucide-react'
+import { CheckCircle2, Clock, Pencil, Trash2, Check, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useConfirmarEntrega, useEliminarGanador } from '@/hooks/useGanadores'
+import { useConfirmarEntrega } from '@/hooks/useGanadores'
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from '@/hooks/use-toast'
 
 export function GanadorRow({ ganador, onEditar, onEliminar }) {
+  const { user } = useAuth()
   const confirmarMutation = useConfirmarEntrega()
+
+  // Solo el usuario que registró el ganador puede confirmar la entrega
+  const esCreador = user?.id === ganador.created_by
+  const puedeConfirmar = !ganador.entrega_confirmada && esCreador
 
   async function handleConfirmar() {
     try {
@@ -35,18 +41,32 @@ export function GanadorRow({ ganador, onEditar, onEliminar }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-1">
+          {/* Confirmar entrega: solo visible para el creador del registro */}
           {!ganador.entrega_confirmada && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-              onClick={handleConfirmar}
-              disabled={confirmarMutation.isPending}
-              title="Confirmar entrega"
-            >
-              <Check className="h-4 w-4" />
-            </Button>
+            esCreador ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={handleConfirmar}
+                disabled={confirmarMutation.isPending}
+                title="Confirmar entrega"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-gray-300 cursor-not-allowed"
+                disabled
+                title="Solo quien registró este ganador puede confirmar la entrega"
+              >
+                <Lock className="h-4 w-4" />
+              </Button>
+            )
           )}
+
           <Button
             size="sm"
             variant="ghost"

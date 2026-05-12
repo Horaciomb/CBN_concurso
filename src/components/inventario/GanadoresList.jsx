@@ -71,11 +71,16 @@ function ImageThumb({ url, label, icon: Icon }) {
   )
 }
 
-export function GanadoresList({ ganadores }) {
+export function GanadoresList({ ganadores, totalSinFiltro, busqueda }) {
+  const estaBuscando = busqueda && busqueda.trim().length > 0
+
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-        {ganadores.length} entrega{ganadores.length !== 1 ? 's' : ''} confirmada{ganadores.length !== 1 ? 's' : ''}
+        {estaBuscando
+          ? `${ganadores.length} de ${totalSinFiltro} entrega${totalSinFiltro !== 1 ? 's' : ''} — filtrado por "${busqueda}"`
+          : `${ganadores.length} entrega${ganadores.length !== 1 ? 's' : ''} confirmada${ganadores.length !== 1 ? 's' : ''}`
+        }
       </h2>
 
       <div className="divide-y rounded-md border bg-white overflow-hidden">

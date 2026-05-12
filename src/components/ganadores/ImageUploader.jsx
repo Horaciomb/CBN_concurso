@@ -70,13 +70,24 @@ export function ImageUploader({ label, folder, value, onChange }) {
   )
 }
 
+// Fallback para contextos no-HTTPS (red local, HTTP)
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
+}
+
 export async function uploadImage(fileOrObj, folder) {
   if (!fileOrObj) return null
   const file = fileOrObj.file ?? fileOrObj
   if (!file || !(file instanceof File)) return typeof fileOrObj === 'string' ? fileOrObj : null
 
   const ext = file.name.split('.').pop()
-  const fileName = `${crypto.randomUUID()}.${ext}`
+  const fileName = `${generateUUID()}.${ext}`
   const path = `${folder}/${fileName}`
 
   const { error } = await supabase.storage.from('evidencias').upload(path, file)

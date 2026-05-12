@@ -35,3 +35,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: 'Robinson';
+  src: url('./assets/fonts/Robinson-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

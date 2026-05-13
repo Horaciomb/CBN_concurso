@@ -32,8 +32,8 @@ function RequireAdmin({ children }) {
   return children
 }
 
-// En producción corre bajo /concurso_cbn/, en dev bajo /
-const basename = import.meta.env.PROD ? '/concurso_cbn' : '/'
+// Usa la BASE_URL que Vite inyecta: '/' en dev, '/raspadita_mundial/' en prod
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 
 export const router = createBrowserRouter([
   // Raíz → siempre al login

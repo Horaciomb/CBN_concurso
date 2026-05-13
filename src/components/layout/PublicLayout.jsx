@@ -25,7 +25,7 @@ export function PublicLayout({ children }) {
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-red-600" />
             <span className="text-base font-semibold text-gray-800">
-              Concurso CBN — Inventario de Premios
+              Inventario de Premios
             </span>
           </div>
 

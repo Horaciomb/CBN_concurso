@@ -30,7 +30,7 @@ export function AdminLayout({ children }) {
             <span className="text-lg font-bold text-gray-900">Gestión de Ganadores</span>
           </button>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">{user?.email}</span>
+            <span className="hidden sm:block text-sm text-gray-600">{user?.email}</span>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-1" />
               Salir

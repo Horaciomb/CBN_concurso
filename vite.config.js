@@ -4,6 +4,8 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  // Base para que los assets usen la subruta correcta en producción
+  base: '/concurso_cbn/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

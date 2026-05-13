@@ -47,7 +47,7 @@ export function LoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl">Concurso CBN</CardTitle>
-          <CardDescription>Ingresa con tu cuenta de administrador</CardDescription>
+          <CardDescription>Ingresa con tus credenciales</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -32,6 +32,9 @@ function RequireAdmin({ children }) {
   return children
 }
 
+// En producción corre bajo /concurso_cbn/, en dev bajo /
+const basename = import.meta.env.PROD ? '/concurso_cbn' : '/'
+
 export const router = createBrowserRouter([
   // Raíz → siempre al login
   { path: '/', element: <Navigate to="/login" replace /> },
@@ -51,4 +54,4 @@ export const router = createBrowserRouter([
     path: '/admin/ganadores',
     element: <RequireAdmin><GanadoresPage /></RequireAdmin>,
   },
-])
+], { basename })

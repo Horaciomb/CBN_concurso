@@ -29,7 +29,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       await login(values.email, values.password)
-      navigate('/admin/ganadores')
+      navigate('/inventario')
     } catch (err) {
       toast({ title: 'Error de acceso', description: err.message, variant: 'destructive' })
     } finally {
@@ -38,11 +38,11 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
-            <div className="bg-blue-600 p-3 rounded-full">
+            <div className="bg-red-600 p-3 rounded-full">
               <Trophy className="h-8 w-8 text-white" />
             </div>
           </div>
@@ -61,7 +61,7 @@ export function LoginPage() {
               <Input id="password" type="password" placeholder="••••••••" {...register('password')} />
               {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Ingresar
             </Button>

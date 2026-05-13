@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Trophy } from 'lucide-react'
+import { LogOut, Trophy, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from '@/hooks/use-toast'
@@ -21,10 +21,14 @@ export function AdminLayout({ children }) {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/inventario')}
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+            title="Volver al inventario"
+          >
             <Trophy className="h-6 w-6 text-red-600" />
             <span className="text-lg font-bold text-gray-900">Gestión de Ganadores</span>
-          </div>
+          </button>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600">{user?.email}</span>
             <Button variant="outline" size="sm" onClick={handleLogout}>

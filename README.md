@@ -1,4 +1,4 @@
-# Sistema de Gestión de Ganadores - Promoción Raspadita al Mundial CBN
+# Sistema de Gestión de Ganadores - Raspadita Mundialera CBN
 
 Este proyecto es una aplicación web diseñada para gestionar el inventario y la entrega de premios de una campaña promocional. Permite registrar ganadores, descontar stock de productos, y mostrar el inventario actualizado al dueño de la campaña.
 

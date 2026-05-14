@@ -46,7 +46,7 @@ export function LoginPage() {
               <Trophy className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Promoción Raspadita al Mundial CBN</CardTitle>
+          <CardTitle className="text-2xl">Raspadita Mundialera CBN</CardTitle>
           <CardDescription>Ingresa con tus credenciales</CardDescription>
         </CardHeader>
         <CardContent>

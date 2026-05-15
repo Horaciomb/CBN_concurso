@@ -37,9 +37,16 @@ export function LoginPage() {
     }
   }
 
+  const bgUrl = `${import.meta.env.BASE_URL}bg-login-pc.jpg`
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div
+      className="relative min-h-screen flex items-center justify-center p-4 bg-cover bg-[82%_center] sm:bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('${bgUrl}')` }}
+    >
+      {/* Capa de oscurecimiento para legibilidad del formulario */}
+      <div className="absolute inset-0 bg-black/40" />
+      <Card className="relative z-10 w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
             <div className="bg-red-600 p-3 rounded-full">

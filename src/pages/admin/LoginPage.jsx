@@ -38,10 +38,11 @@ export function LoginPage() {
   }
 
   const bgUrl = `${import.meta.env.BASE_URL}bg-login-pc.jpg`
+  const pacenaUrl = `${import.meta.env.BASE_URL}pacena_mundial.png`
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center p-4 bg-cover bg-[82%_center] sm:bg-center bg-no-repeat"
+      className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-[82%_center] sm:bg-center bg-no-repeat"
       style={{ backgroundImage: `url('${bgUrl}')` }}
     >
       {/* Capa de oscurecimiento para legibilidad del formulario */}
@@ -75,6 +76,15 @@ export function LoginPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Logo Paceña Mundial: esquina inferior izquierda en desktop, centrado en móvil */}
+      <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center sm:justify-start sm:left-8 sm:right-auto">
+        <img
+          src={pacenaUrl}
+          alt="Paceña Mundial"
+          className="h-40 w-auto object-contain drop-shadow-lg"
+        />
+      </div>
     </div>
   )
 }

@@ -82,8 +82,9 @@ export function LoginPage() {
         <img
           src={pacenaUrl}
           alt="Paceña Mundial"
-          className="h-40 w-auto object-contain drop-shadow-lg"
+          className="h-24 sm:h-40 w-auto object-contain drop-shadow-lg"
         />
+
       </div>
     </div>
   )

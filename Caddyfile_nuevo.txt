@@ -1,0 +1,63 @@
+srv.beneficioslatam.com {
+    root * C:/Proyectos/web
+    file_server
+
+    handle /ferreterias/api/* {
+        uri strip_prefix /ferreterias
+        reverse_proxy localhost:8100
+    }
+
+    handle_path /ferreterias/* {
+        root * C:/Proyectos/web/frontend
+        try_files {path} /mapa.html
+    }
+
+    handle /clientes* {
+        uri strip_prefix /clientes
+        reverse_proxy localhost:8101 {
+            header_up X-Forwarded-Prefix /clientes
+        }
+    }
+    handle_path /cirpob/* {
+        reverse_proxy 127.0.0.1:8001
+    }
+
+    redir /zas/correc /zas/correc/
+
+    # -----------------------------------------
+    # Afiliac - Correcciones Gold ZAS
+    # -----------------------------------------
+    handle_path /zas/correc/* {
+        uri strip_prefix /zas/correc
+        reverse_proxy localhost:8102
+    }
+
+    # -----------------------------------------
+    # Raspadita Mundialera CBN
+    # -----------------------------------------
+    redir /raspadita_mundial /raspadita_mundial/ 301
+
+    handle_path /raspadita_mundial/* {
+        root * C:/Proyectos/web/raspadita_mundial/dist
+        file_server
+        try_files {path} /index.html
+    }
+
+# Headers de seguridad
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), camera=(), microphone=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https:; connect-src 'self' https://srv.beneficioslatam.com https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'"
+    }
+
+    log {
+        output file C:/Caddy/logs/access.log
+        format json
+    }
+}
+
+:80 {
+    redir https://{host}{uri} permanent
+}

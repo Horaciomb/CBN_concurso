@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { LoginPage } from '@/pages/admin/LoginPage'
 import { GanadoresPage } from '@/pages/admin/GanadoresPage'
+import { ParticipantesPage } from '@/pages/admin/ParticipantesPage'
+import { SorteoPage } from '@/pages/admin/SorteoPage'
 import { InventarioPage } from '@/pages/public/InventarioPage'
 import { ArticuloDetallePage } from '@/pages/public/ArticuloDetallePage'
 
@@ -53,5 +55,13 @@ export const router = createBrowserRouter([
   {
     path: '/admin/ganadores',
     element: <RequireAdmin><GanadoresPage /></RequireAdmin>,
+  },
+  {
+    path: '/admin/participantes',
+    element: <RequireAdmin><ParticipantesPage /></RequireAdmin>,
+  },
+  {
+    path: '/admin/sorteo',
+    element: <RequireAdmin><SorteoPage /></RequireAdmin>,
   },
 ], { basename })

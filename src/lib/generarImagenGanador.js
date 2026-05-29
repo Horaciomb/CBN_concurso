@@ -55,7 +55,7 @@ export async function generarImagenGanador({ nombre, region, ticket }) {
   ctx.drawImage(fondo, srcX, 0, srcW, fondo.height, 0, 0, W, H)
 
   // ── 2. LOGO PACEÑA – top center ───────────────────────────────────────
-  drawRW(ctx, logo, 500, Math.round((W - 500) / 2), 1)
+  drawRW(ctx, logo, 500, Math.round((W - 500) / 2), -20)
 
   // ── 3. FELICIDADES stamp – dibujado ANTES que RASPADITA (capa inferior)
   const feliW = 600
@@ -73,15 +73,16 @@ export async function generarImagenGanador({ nombre, region, ticket }) {
   //   RÉGION: content x=[110,508] y=[47,281] white=[127,281]
   //   NOMBRE: content x=[131,529] y=[40,274] white=[120,274]
   //   Content width = 398px para los tres → scale = 262/398 = 0.658
-  const TARGET_W = 262
-  const scaleC = TARGET_W / 398
-  const CARD_OFFSET = 40    // desplazamiento horizontal a la derecha
-  const CARD_Y0 = 400   // TICKET arranca al mismo nivel que el stamp (feliW y=400)
+  const TARGET_W    = 262
+  const scaleC      = TARGET_W / 398
+  const CARD_OFFSET = 80     // desplazamiento horizontal a la derecha
+  const CARD_Y0     = 400    // TICKET arranca al mismo nivel que el stamp
+  const CARD_GAP    = 195   // espaciado calculado para que NOMBRE termine igual que SIEMPRE
 
   const CARDS = [
-    { img: tktLbl, cxs: 91, cys: 54, wmin: 134, wmax: 288, vtop: CARD_Y0, val: (ticket || '').toUpperCase() },
-    { img: regLbl, cxs: 110, cys: 47, wmin: 127, wmax: 281, vtop: CARD_Y0 + 165, val: (region || '').toUpperCase() },
-    { img: nomLbl, cxs: 131, cys: 40, wmin: 120, wmax: 274, vtop: CARD_Y0 + 330, val: (nombre || '').toUpperCase() },
+    { img: tktLbl, cxs: 91,  cys: 54,  wmin: 134, wmax: 288, vtop: CARD_Y0,            val: (ticket || '').toUpperCase() },
+    { img: regLbl, cxs: 110, cys: 47,  wmin: 127, wmax: 281, vtop: CARD_Y0 + CARD_GAP,     val: (region || '').toUpperCase() },
+    { img: nomLbl, cxs: 131, cys: 40,  wmin: 120, wmax: 274, vtop: CARD_Y0 + CARD_GAP * 2, val: (nombre || '').toUpperCase() },
   ]
 
   ctx.textBaseline = 'middle'
@@ -94,8 +95,8 @@ export async function generarImagenGanador({ nombre, region, ticket }) {
     const ay = vtop - Math.round(cys * scaleC)
     ctx.drawImage(img, ax, ay, aw, ah)
 
-    const wbTop = vtop + Math.round((wmin - cys) * scaleC)
-    const wbBot = vtop + Math.round((wmax - cys) * scaleC)
+    const wbTop  = vtop + Math.round((wmin - cys) * scaleC)
+    const wbBot  = vtop + Math.round((wmax - cys) * scaleC)
     const textCy = Math.round((wbTop + wbBot) / 2)
     const textCx = CARD_OFFSET + Math.round(TARGET_W / 2)
 
@@ -114,10 +115,12 @@ export async function generarImagenGanador({ nombre, region, ticket }) {
   const siemH = Math.round(siempre.height * siemW / siempre.width)   // ≈ 212px
   drawRW(ctx, siempre, siemW, 350, H - siemH - 20)
 
-  // ── 7. GANADORES – esquina inferior derecha ───────────────────────────
+  // ── 7. GANADORES – centrado verticalmente con SIEMPRE ────────────────
   const ganW = 320
-  const ganH = Math.round(ganadores.height * ganW / ganadores.width)  // ≈ 183px
-  drawRW(ctx, ganadores, ganW, 790, H - ganH - 20)
+  const ganH = Math.round(ganadores.height * ganW / ganadores.width)
+  // siemCenter = siemY + siemH/2 = 721 + 131 = 852 → ganY = 852 - ganH/2 = 765
+  const ganY = Math.round((H - siemH - 20) + siemH / 2 - ganH / 2)
+  drawRW(ctx, ganadores, ganW, 790, ganY)
 
   // ── Exportar como PNG ─────────────────────────────────────────────────
   return new Promise((resolve) => {

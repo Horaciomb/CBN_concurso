@@ -1,0 +1,344 @@
+# CLAUDE.md — Raspadita al Mundial CBN
+
+## Contexto del proyecto
+
+Aplicación web para gestionar la campaña promocional **"Raspadita al Mundial CBN"** de Cervecería Boliviana Nacional. Tiene dos módulos principales:
+
+1. **Gestión de ganadores de raspaditas** — registro diario de ganadores con entrega de premios (Vasos, Poleras, Bolsones), control de stock y evidencias fotográficas.
+2. **Sorteo con seed verificable** — carga de participantes desde Excel, sorteo SHA-256 determinista y generación de imagen del ganador.
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Framework | React 18 + Vite |
+| Lenguaje | JavaScript (NO TypeScript) |
+| Estilos | Tailwind CSS v3 |
+| Componentes UI | shadcn/ui |
+| Backend | Supabase (Auth + Database + Storage) |
+| Routing | React Router v6 con `createBrowserRouter` |
+| Formularios | React Hook Form + Zod |
+| Estado servidor | TanStack Query v5 |
+| Parseo Excel | SheetJS (`xlsx`) |
+| Generación imagen | HTML Canvas API (nativo) |
+
+---
+
+## Despliegue en producción
+
+| Item | Valor |
+|---|---|
+| Servidor | Windows Server 2025 |
+| IP | `10.0.0.2` (VPN) |
+| SSH | `ssh Administrator@10.0.0.2` |
+| Web server | Caddy — `C:\Caddy\Caddyfile` |
+| Dominio | `https://srv.beneficioslatam.com/raspadita_mundial` |
+| Archivos | `C:\Proyectos\web\raspadita_mundial\dist\` |
+| Recarga Caddy | `ssh Administrator@10.0.0.2 "C:\Caddy\caddy.exe reload --config C:\Caddy\Caddyfile"` |
+
+### Comando de despliegue (siempre usar este flujo)
+```bash
+npm run build
+ssh Administrator@10.0.0.2 "rmdir /s /q C:\Proyectos\web\raspadita_mundial\dist"
+scp -r ".\dist" Administrator@10.0.0.2:/C:/Proyectos/web/raspadita_mundial/
+```
+> ⚠️ Siempre borrar `dist` antes del SCP. Si no, el directorio se anida dentro del existente.
+
+### Bloque Caddyfile relevante (ya configurado)
+```
+redir /raspadita_mundial /raspadita_mundial/ 301
+handle_path /raspadita_mundial/* {
+    root * C:/Proyectos/web/raspadita_mundial/dist
+    file_server
+    try_files {path} /index.html
+}
+```
+
+### vite.config.js — base dinámica
+```js
+export default defineConfig(({ command }) => ({
+  plugins: [react()],
+  base: command === 'build' ? '/raspadita_mundial/' : '/',
+  resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+}))
+```
+
+---
+
+## Roles y autenticación
+
+- Tabla `public.usuarios` con campo `rol` ('admin' | 'viewer')
+- Función SQL `is_admin()` usada en RLS
+- `useAuth.js` expone `{ user, rol, loading, login, logout, isAdmin, isViewer }`
+- Guard `RequireAdmin` en el router: requiere `rol === 'admin'`
+- Guard `RedirectIfAuth`: si hay sesión activa redirige a `/inventario`
+
+---
+
+## Rutas de la aplicación
+
+| Ruta | Acceso | Descripción |
+|---|---|---|
+| `/login` | Público | Login con Supabase Auth |
+| `/inventario` | Público | Inventario de artículos con stock |
+| `/inventario/:articuloId` | Público | Detalle + ganadores confirmados + buscador |
+| `/admin/ganadores` | Admin | CRUD de ganadores de raspaditas |
+| `/admin/participantes` | Admin | Carga de Excel + tabla de participantes del sorteo |
+| `/admin/sorteo` | Admin | Realizar sorteo + historial verificable |
+
+El `basename` del router se deriva de `import.meta.env.BASE_URL`.
+
+---
+
+## Estructura de carpetas
+
+```
+src/
+├── components/
+│   ├── ui/                        # shadcn/ui (no tocar)
+│   ├── layout/
+│   │   ├── AdminLayout.jsx        # Header con nav: Ganadores / Participantes / Sorteo
+│   │   └── PublicLayout.jsx       # Header público con rol-based buttons
+│   ├── ganadores/
+│   │   ├── GanadorForm.jsx
+│   │   ├── GanadorTable.jsx
+│   │   ├── GanadorRow.jsx         # Confirmar entrega solo el creador del registro
+│   │   └── ImageUploader.jsx      # Con fallback de crypto.randomUUID para HTTP móvil
+│   ├── inventario/
+│   │   ├── ArticuloCard.jsx
+│   │   └── GanadoresList.jsx      # Thumbnails con lightbox + buscador
+│   ├── participantes/
+│   │   ├── ExcelUploader.jsx      # Drag-drop + previsualización de 5 filas
+│   │   └── ParticipantesTable.jsx # Filtro + badge elegible/ya ganó
+│   └── sorteo/
+│       ├── SorteoPanel.jsx        # Botón único "Realizar sorteo" → ganador
+│       └── SorteoHistorial.jsx    # Tabla expandible + botón "Imagen" por fila
+├── pages/
+│   ├── admin/
+│   │   ├── LoginPage.jsx          # BG: bg-login-pc.jpg, logo pacena_mundial.png abajo
+│   │   ├── GanadoresPage.jsx      # Dropdown PDF formularios (Bolsón/Polera/Vaso)
+│   │   ├── ParticipantesPage.jsx
+│   │   └── SorteoPage.jsx
+│   └── public/
+│       ├── InventarioPage.jsx
+│       └── ArticuloDetallePage.jsx
+├── hooks/
+│   ├── useAuth.js
+│   ├── useArticulos.js
+│   ├── useGanadores.js
+│   ├── useParticipantes.js        # cargar/eliminar lotes de participantes
+│   └── useSorteo.js               # elegibles (excluye ganadores por id+CI), historial, registrar
+├── lib/
+│   ├── supabase.js
+│   ├── queryClient.js
+│   ├── validations.js
+│   ├── sorteo.js                  # generarSeed(), ejecutarSorteo(), verificarSorteo()
+│   ├── excelParser.js             # parsearExcel(file) con SheetJS
+│   └── generarImagenGanador.js    # Canvas compositor de imagen del ganador
+└── router/
+    └── index.jsx
+```
+
+---
+
+## Base de datos (Supabase)
+
+### Tablas existentes
+
+#### `usuarios`
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | uuid PK | = auth.users.id |
+| email | text | |
+| rol | text | 'admin' \| 'viewer' |
+
+#### `articulos`
+| Campo | Tipo |
+|---|---|
+| id | uuid PK |
+| nombre | text |
+| stock_inicial | int |
+| stock_actual | int |
+| activo | boolean |
+
+#### `ganadores`
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | uuid PK | |
+| nombre_ganador | text | |
+| codigo | text UNIQUE | Código de la raspadita |
+| articulo_id | uuid FK | |
+| numero_carnet | text | |
+| foto_formulario_aj_url | text | URL en Storage |
+| foto_entrega_url | text | URL en Storage |
+| entrega_confirmada | boolean | |
+| entrega_confirmada_at | timestamptz | |
+| created_by | uuid FK → usuarios | |
+| eliminado | boolean | Soft delete |
+| eliminado_at | timestamptz | |
+| eliminado_by | uuid FK → usuarios | |
+
+#### `auditoria_stock`
+Registra cada cambio de stock. Motivos: `'entrega_registrada'`, `'entrega_eliminada'`, `'ajuste_manual'`.
+
+#### `cargas_participantes`
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | uuid PK | |
+| nombre_archivo | text | Nombre del Excel cargado |
+| total_registros | int | |
+| cargado_por | uuid FK → auth.users | |
+| created_at | timestamptz | |
+
+#### `participantes`
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | uuid PK | |
+| carga_id | uuid FK → cargas_participantes | ON DELETE CASCADE |
+| numero | int | N° del Excel |
+| fecha | date | |
+| nombre_completo | text | |
+| email | text | |
+| fecha_nacimiento | text | |
+| telefono | text | |
+| ci | text | **Clave para exclusión duplicados** |
+| departamento | text | |
+| codigo | text | Código raspadita del participante |
+| premio | text | |
+| status_interno | text | |
+
+#### `sorteos_raspadita`
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | uuid PK | |
+| seed | text | 64 chars hex |
+| timestamp_ejecutado | bigint | ms (usado en el hash) |
+| total_elegibles | int | |
+| posicion_virtual | int | |
+| participante_id | uuid FK → participantes | |
+| nombre_ganador | text | Desnormalizado |
+| ci_ganador | text | Desnormalizado — usado para exclusión |
+| hash_verificacion | text | SHA-256(seed\|participante_id\|timestamp) |
+| ejecutado_por | uuid FK → auth.users | |
+
+### Storage bucket
+Nombre: `evidencias` — carpetas `formularios-aj/` y `entregas/`
+
+---
+
+## Módulo de sorteo — lógica clave
+
+**Archivo**: `src/lib/sorteo.js`
+
+```
+virtualPos = (SHA-256(seed + "|" + timestamp) como BigInt) % totalElegibles + 1
+ganador    = elegibles[virtualPos - 1]   // lista ordenada por id (determinista)
+hash       = SHA-256(seed + "|" + ganador.id + "|" + timestamp)
+```
+
+- El seed se genera con `crypto.getRandomValues()` (Web Crypto API)
+- Toda la lógica corre en el browser (sin backend)
+- Los elegibles excluyen: participantes que ya ganaron (por `participante_id`) **y** participantes con el mismo CI que un ganador anterior
+- El resultado se guarda en `sorteos_raspadita` y es verificable offline con `sha256sum`
+
+**Verificación pública:**
+```bash
+echo -n "SEED|PARTICIPANTE_ID|TIMESTAMP" | sha256sum
+# debe coincidir con hash_verificacion guardado
+```
+
+---
+
+## Generación de imagen del ganador
+
+**Archivo**: `src/lib/generarImagenGanador.js`
+
+Compone una imagen PNG 1200×1003 con 9 assets de `public/ganador/`:
+- `FONDO.png`, `LOGO PACEÑA.png`, `FELICIDADES.png`
+- `TICKET GANADOR -BAJA OPAC.png`, `REGION- BAJA OPACIDAD.png`, `NOMBRE- BAJA OPAC.png`
+- `RASPADITA AL MUNDIAL.png`, `SIEMPRE CON LA NUESTRA.png`, `GANADORES.png`
+
+**Constantes ajustables** (líneas 76-80):
+```js
+const TARGET_W    = 262   // ancho visible de cada tarjeta
+const CARD_OFFSET = 80    // desplazamiento horizontal (más = más a la derecha)
+const CARD_Y0     = 400   // y de inicio del primer cuadro (TICKET GANADOR)
+const CARD_GAP    = 195   // espaciado vertical entre los 3 cuadros
+```
+
+**Orden de capas** (importante):
+1. FONDO (cover crop)
+2. LOGO PACEÑA
+3. FELICIDADES stamp (capa inferior al texto RASPADITA)
+4. RASPADITA AL MUNDIAL (encima del stamp)
+5. Tres tarjetas izquierda (TICKET, REGIÓN, NOMBRE)
+6. SIEMPRE CON LA NUESTRA (anclado al borde inferior)
+7. GANADORES (centrado verticalmente con SIEMPRE)
+
+El botón "Generar imagen" aparece:
+- En `SorteoPanel` después de ejecutar un sorteo
+- En `SorteoHistorial` como botón por fila (requiere JOIN con `participantes` para tener `departamento` y `codigo`)
+
+---
+
+## Parseo de Excel
+
+**Archivo**: `src/lib/excelParser.js`
+
+Formato esperado del Excel (columnas exactas):
+`N°`, `Fecha`, `Nombre Completo`, `Email`, `Fecha Nacimiento`, `Telefono`, `CI`, `Departamento`, `Codigo`, `Premio`, `Status (Interno)`
+
+- Valores `"-"` o vacíos se convierten a `null`
+- La columna `N°` puede tener encoding raro — se detecta por prefijo `N`
+
+---
+
+## Notas de desarrollo importantes
+
+- **JavaScript puro**, no TypeScript
+- `crypto.randomUUID()` tiene fallback para HTTP móvil (en `ImageUploader.jsx`)
+- Todos los assets de `public/` se referencian con `import.meta.env.BASE_URL` + path
+- Los PDFs de formularios están en `public/docs/` y se descargan desde `GanadoresPage`
+- La imagen de fondo del login es `public/bg-login-pc.jpg` con posición `bg-[82%_center] sm:bg-center`
+- El logo `public/pacena_mundial.png` aparece en esquina inferior izquierda del login (absolute, bottom-6)
+- `AdminLayout` usa `useLocation()` para el tab activo en la navegación
+
+---
+
+## Variables de entorno
+
+```env
+VITE_SUPABASE_URL=https://<proyecto>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
+```
+
+---
+
+## Comandos útiles
+
+```bash
+npm run dev        # desarrollo local (base='/')
+npm run build      # producción (base='/raspadita_mundial/')
+
+# Despliegue completo
+npm run build
+ssh Administrator@10.0.0.2 "rmdir /s /q C:\Proyectos\web\raspadita_mundial\dist"
+scp -r ".\dist" Administrator@10.0.0.2:/C:/Proyectos/web/raspadita_mundial/
+
+# Verificar despliegue
+curl -o /dev/null -w "%{http_code}" https://srv.beneficioslatam.com/raspadita_mundial/
+```
+
+---
+
+## SQL pendiente de ejecutar en Supabase (si es instancia nueva)
+
+Ver archivo `DESPLIEGUE.md` en la raíz del proyecto para el SQL completo de tablas, RLS y función `is_admin()`.
+
+Los pasos críticos son:
+1. Crear función `is_admin()` que consulta `public.usuarios`
+2. Crear tablas: `usuarios`, `articulos`, `ganadores`, `auditoria_stock`, `cargas_participantes`, `participantes`, `sorteos_raspadita`
+3. Activar RLS en todas las tablas con políticas basadas en `is_admin()`
+4. Crear bucket `evidencias` en Storage con políticas de INSERT/SELECT para usuarios autenticados

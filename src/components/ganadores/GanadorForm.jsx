@@ -12,6 +12,11 @@ import { useCrearGanador, useEditarGanador } from '@/hooks/useGanadores'
 import { ganadorSchema } from '@/lib/validations'
 import { toast } from '@/hooks/use-toast'
 
+const DEPARTAMENTOS = [
+  'La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 'Potosí',
+  'Chuquisaca', 'Tarija', 'Beni', 'Pando',
+]
+
 export function GanadorForm({ ganador, onSuccess }) {
   const esEdicion = !!ganador
   const { data: articulos } = useArticulos()
@@ -30,10 +35,12 @@ export function GanadorForm({ ganador, onSuccess }) {
       numero_carnet: ganador?.numero_carnet ?? '',
       foto_formulario_aj_url: ganador?.foto_formulario_aj_url ?? '',
       foto_entrega_url: ganador?.foto_entrega_url ?? '',
+      departamento: ganador?.departamento ?? '',
     },
   })
 
   const articuloSeleccionado = watch('articulo_id')
+  const departamentoSeleccionado = watch('departamento')
 
   async function onSubmit(values) {
     try {
@@ -96,6 +103,23 @@ export function GanadorForm({ ganador, onSuccess }) {
             </SelectContent>
           </Select>
           {errors.articulo_id && <p className="text-xs text-red-500">{errors.articulo_id.message}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Departamento</Label>
+          <Select
+            value={departamentoSeleccionado || ''}
+            onValueChange={(v) => setValue('departamento', v, { shouldValidate: true })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar departamento..." />
+            </SelectTrigger>
+            <SelectContent>
+              {DEPARTAMENTOS.map((dep) => (
+                <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

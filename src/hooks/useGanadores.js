@@ -60,6 +60,7 @@ async function crearGanador(formData) {
       numero_carnet: formData.numero_carnet,
       foto_formulario_aj_url: formData.foto_formulario_aj_url || null,
       foto_entrega_url: formData.foto_entrega_url || null,
+      departamento: formData.departamento || null,
       eliminado: false,
       entrega_confirmada: false,
       created_by: userId,
@@ -125,6 +126,7 @@ async function editarGanador({ id, formData, articuloIdAnterior }) {
       numero_carnet: formData.numero_carnet,
       foto_formulario_aj_url: formData.foto_formulario_aj_url || null,
       foto_entrega_url: formData.foto_entrega_url || null,
+      departamento: formData.departamento || null,
       updated_by: userId,
       updated_at: new Date().toISOString(),
     })
@@ -190,6 +192,34 @@ export function useGanadoresPorArticulo(articuloId) {
   })
 }
 
+async function fetchEntregasPorDepartamento(articuloId) {
+  let query = supabase
+    .from('ganadores')
+    .select('departamento, articulo_id')
+    .eq('entrega_confirmada', true)
+    .eq('eliminado', false)
+    .not('departamento', 'is', null)
+
+  if (articuloId) query = query.eq('articulo_id', articuloId)
+
+  const { data, error } = await query
+  if (error) throw error
+
+  const counts = {}
+  for (const g of data) counts[g.departamento] = (counts[g.departamento] || 0) + 1
+
+  return Object.entries(counts)
+    .map(([departamento, count]) => ({ departamento, count }))
+    .sort((a, b) => b.count - a.count)
+}
+
+export function useEntregasPorDepartamento(articuloId) {
+  return useQuery({
+    queryKey: ['entregas-por-departamento', articuloId ?? null],
+    queryFn: () => fetchEntregasPorDepartamento(articuloId),
+  })
+}
+
 export function useCrearGanador() {
   const qc = useQueryClient()
   return useMutation({
@@ -208,6 +238,7 @@ export function useEditarGanador() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ganadores'] })
       qc.invalidateQueries({ queryKey: ['articulos'] })
+      qc.invalidateQueries({ queryKey: ['entregas-por-departamento'] })
     },
   })
 }
@@ -219,6 +250,7 @@ export function useEliminarGanador() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ganadores'] })
       qc.invalidateQueries({ queryKey: ['articulos'] })
+      qc.invalidateQueries({ queryKey: ['entregas-por-departamento'] })
     },
   })
 }
@@ -249,6 +281,7 @@ export function useConfirmarEntrega() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['ganadores'] })
       qc.invalidateQueries({ queryKey: ['ganadores-publicos'] })
+      qc.invalidateQueries({ queryKey: ['entregas-por-departamento'] })
     },
   })
 }

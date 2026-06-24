@@ -97,6 +97,7 @@ export function GanadorTable({ onEditar }) {
                 <th className="px-4 py-3 text-left">Nombre</th>
                 <th className="px-4 py-3 text-left">Artículo</th>
                 <th className="px-4 py-3 text-left">Carnet</th>
+                <th className="px-4 py-3 text-left">Departamento</th>
                 <th className="px-4 py-3 text-left">Estado</th>
                 <th className="px-4 py-3 text-left">Acciones</th>
               </tr>

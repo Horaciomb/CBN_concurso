@@ -1,5 +1,6 @@
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { ArticuloCard } from '@/components/inventario/ArticuloCard'
+import { HistogramaEntregas } from '@/components/inventario/HistogramaEntregas'
 import { useArticulos } from '@/hooks/useArticulos'
 import { Loader2, Package } from 'lucide-react'
 
@@ -41,6 +42,9 @@ export function InventarioPage() {
             <p>No hay artículos disponibles.</p>
           </div>
         )}
+
+        <hr className="border-gray-100" />
+        <HistogramaEntregas />
       </div>
     </PublicLayout>
   )

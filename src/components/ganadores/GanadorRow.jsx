@@ -28,6 +28,7 @@ export function GanadorRow({ ganador, onEditar, onEliminar }) {
       <td className="px-4 py-3 text-sm font-medium text-gray-900">{ganador.nombre_ganador}</td>
       <td className="px-4 py-3 text-sm text-gray-600">{ganador.articulos?.nombre}</td>
       <td className="px-4 py-3 text-sm text-gray-600">{ganador.numero_carnet}</td>
+      <td className="px-4 py-3 text-sm text-gray-600">{ganador.departamento ?? '—'}</td>
       <td className="px-4 py-3">
         {ganador.entrega_confirmada ? (
           <Badge variant="success" className="flex items-center gap-1 w-fit">

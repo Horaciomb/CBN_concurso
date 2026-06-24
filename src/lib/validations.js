@@ -7,6 +7,7 @@ export const ganadorSchema = z.object({
   numero_carnet: z.string().min(1, 'El número de carnet es requerido').max(50),
   foto_formulario_aj_url: z.string().optional().nullable(),
   foto_entrega_url: z.string().optional().nullable(),
+  departamento: z.string().optional().nullable(),
 })
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
